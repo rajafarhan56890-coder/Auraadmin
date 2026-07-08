@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FoodHub Pro — Admin Panel</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* =========================================================
+   FoodHub Pro — Admin Panel styles
+   Same design tokens as the storefront ("kitchen ticket rail"):
+   ink/paper background pair, zest accent, chili for destructive/
+   cancelled states, herb for success/delivered states.
+   ========================================================= */
+:root{
+  --ink:#1E1B18; --ink-raised:#2A2521; --paper:#FAF6EE; --paper-dim:#EFE8D8;
+  --zest:#FFB627; --zest-dark:#E39F16; --chili:#E4572E; --herb:#4C7A5E; --slate:#6B6560;
+  --bg:var(--ink); --bg-raised:var(--ink-raised); --text:var(--paper); --text-muted:#C9C2B8;
+  --border:rgba(250,246,238,.12); --shadow:0 10px 30px rgba(0,0,0,.35);
+  --font-display:'Archivo Black',sans-serif; --font-body:'Work Sans',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+  --radius:10px;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;-webkit-font-smoothing:antialiased;}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,select,textarea{font:inherit;color:var(--text);}
+a{color:var(--zest);text-decoration:none;}
+.mono{font-family:var(--font-mono);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+
+/* ---------- Login screen ---------- */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 20% 20%,rgba(255,182,39,.08),transparent 45%),var(--bg);}
+.login-card{width:100%;max-width:380px;background:var(--bg-raised);border:1px solid var(--border);border-radius:16px;padding:36px 32px;box-shadow:var(--shadow);}
+.login-brand{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.login-brand-mark{width:34px;height:34px;border-radius:8px;background:var(--zest);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);color:var(--ink);font-size:16px;}
+.login-brand-name{font-family:var(--font-display);font-size:15px;letter-spacing:.02em;}
+.login-sub{color:var(--text-muted);font-size:13px;margin:0 0 26px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:6px;letter-spacing:.02em;text-transform:uppercase;}
+.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 12px;font-size:14px;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--zest);}
+.field-error{color:var(--chili);font-size:12.5px;min-height:1.2em;margin-top:2px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:8px;font-weight:600;font-size:14px;transition:transform .15s ease,opacity .15s ease;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--zest);color:var(--ink);}
+.btn-primary:hover{background:var(--zest-dark);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-outline:hover{border-color:var(--zest);color:var(--zest);}
+.btn-danger{background:transparent;border:1px solid rgba(228,87,46,.5);color:var(--chili);}
+.btn-danger:hover{background:rgba(228,87,46,.12);}
+.btn-block{width:100%;}
+.btn-sm{padding:7px 12px;font-size:12.5px;}
+.btn:disabled{opacity:.5;pointer-events:none;}
+
+/* ---------- Shell layout ---------- */
+#app-shell{display:none;min-height:100vh;grid-template-columns:230px 1fr;}
+#app-shell.visible{display:grid;}
+.sidebar{background:var(--bg-raised);border-right:1px solid var(--border);padding:22px 16px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 8px 20px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:8px;color:var(--text-muted);font-size:14px;font-weight:500;text-align:left;width:100%;}
+.nav-item:hover{background:rgba(250,246,238,.05);color:var(--text);}
+.nav-item.active{background:rgba(255,182,39,.14);color:var(--zest);}
+.nav-item .ic{width:18px;text-align:center;}
+.sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);}
+.admin-email{font-size:11.5px;color:var(--text-muted);padding:0 12px 8px;word-break:break-all;}
+
+.main{padding:26px 32px 60px;overflow-x:hidden;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.page-title{font-family:var(--font-display);font-size:20px;letter-spacing:.01em;}
+.page-sub{color:var(--text-muted);font-size:13px;margin-top:4px;}
+
+.view{display:none;}
+.view.active{display:block;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:26px;}
+.stat-card{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.stat-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;}
+.stat-value{font-family:var(--font-mono);font-size:26px;margin-top:6px;font-weight:600;}
+.stat-value.chili{color:var(--chili);}
+.stat-value.herb{color:var(--herb);}
+.stat-value.zest{color:var(--zest);}
+
+.panel{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap;}
+.panel-head h3{margin:0;font-size:15px;font-weight:700;}
+.search-input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;min-width:180px;}
+.search-input:focus{outline:none;border-color:var(--zest);}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+thead th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--text-muted);padding:10px 16px;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:hover{background:rgba(250,246,238,.03);}
+.table-wrap{overflow-x:auto;}
+.cell-thumb{width:38px;height:38px;border-radius:6px;object-fit:cover;background:var(--bg);}
+.cell-name{font-weight:600;}
+.cell-muted{color:var(--text-muted);font-size:12.5px;}
+.empty-row td{text-align:center;color:var(--text-muted);padding:34px;}
+
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11.5px;font-weight:600;font-family:var(--font-mono);}
+.badge-pending{background:rgba(255,182,39,.15);color:var(--zest);}
+.badge-preparing{background:rgba(107,101,96,.25);color:var(--text);}
+.badge-outfordelivery{background:rgba(76,122,94,.18);color:var(--herb);}
+.badge-delivered{background:rgba(76,122,94,.3);color:#8fd6ac;}
+.badge-cancelled{background:rgba(228,87,46,.15);color:var(--chili);}
+.badge-active{background:rgba(76,122,94,.18);color:var(--herb);}
+.badge-inactive{background:rgba(107,101,96,.25);color:var(--text-muted);}
+
+.status-select{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12.5px;}
+
+.icon-btn{padding:6px 9px;border-radius:6px;color:var(--text-muted);}
+.icon-btn:hover{background:rgba(250,246,238,.08);color:var(--text);}
+
+/* ---------- Modal ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:100;}
+.modal-overlay.visible{display:flex;}
+.modal{background:var(--bg-raised);border:1px solid var(--border);border-radius:14px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+.modal-head h3{margin:0;font-size:16px;}
+.modal-body{padding:20px 22px;}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--border);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:520px){.form-row{grid-template-columns:1fr;}}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.checkbox-row input{width:16px;height:16px;}
+.checkbox-row label{font-size:13.5px;color:var(--text);}
+.image-preview{width:100%;height:140px;border-radius:8px;object-fit:cover;background:var(--bg);margin-bottom:10px;display:none;}
+.image-preview.visible{display:block;}
+
+/* ---------- Order detail drawer ---------- */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:90;}
+.drawer-overlay.visible{display:block;}
+.drawer{position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100%;background:var(--bg-raised);border-left:1px solid var(--border);z-index:91;transition:right .25s ease;overflow-y:auto;}
+.drawer.open{right:0;}
+.drawer-head{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.drawer-body{padding:20px 22px;}
+.drawer-section{margin-bottom:20px;}
+.drawer-section h4{font-size:12px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.03em;margin:0 0 8px;}
+.order-item-row{display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;color:var(--text-muted);}
+.order-item-row span:first-child{color:var(--text);}
+.order-total-row{display:flex;justify-content:space-between;font-weight:700;font-size:14.5px;padding-top:8px;border-top:1px solid var(--border);margin-top:6px;}
+
+/* ---------- Toast ---------- */
+#admin-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink-raised);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:100px;font-size:13.5px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:200;}
+#admin-toast.visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+
+.hamburger-mobile{display:none;}
+@media (max-width:860px){
+  #app-shell.visible{display:block;}
+  .sidebar{position:fixed;left:-240px;top:0;height:100vh;width:230px;z-index:80;transition:left .2s ease;}
+  .sidebar.open{left:0;}
+  .main{padding:20px 16px 60px;}
+  .hamburger-mobile{display:inline-flex;}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-brand-mark">FH</div>
+      <div class="login-brand-name">FOODHUB PRO</div>
+    </div>
+    <p class="login-sub">Admin Panel — sign in with your admin account.</p>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" autocomplete="current-password" required />
+      </div>
+      <p class="field-error" id="login-error"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="login-submit">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="login-brand-mark">FH</div>
+      <div class="login-brand-name" style="font-size:13px;">ADMIN</div>
+    </div>
+    <button class="nav-item active" data-view="dashboard"><span class="ic">▤</span> Dashboard</button>
+    <button class="nav-item" data-view="products"><span class="ic">🍔</span> Products</button>
+    <button class="nav-item" data-view="categories"><span class="ic">🗂</span> Categories</button>
+    <button class="nav-item" data-view="orders"><span class="ic">🧾</span> Orders</button>
+    <button class="nav-item" data-view="customers"><span class="ic">👤</span> Customers</button>
+    <button class="nav-item" data-view="coupons"><span class="ic">🏷</span> Coupons</button>
+    <button class="nav-item" data-view="reviews"><span class="ic">★</span> Reviews</button>
+    <button class="nav-item" data-view="settings"><span class="ic">⚙</span> Settings</button>
+    <div class="sidebar-footer">
+      <div class="admin-email" id="admin-email"></div>
+      <button class="nav-item" id="logout-btn"><span class="ic">↩</span> Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <button class="hamburger-mobile btn btn-outline btn-sm" id="mobile-menu-btn" style="margin-bottom:16px;">☰ Menu</button>
+
+    <!-- ---- Dashboard ---- -->
+    <section class="view active" id="view-dashboard">
+      <div class="topbar"><div><div class="page-title">Dashboard</div><div class="page-sub">Live snapshot of your store, updated in real time.</div></div></div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Orders Today</div><div class="stat-value zest" id="stat-orders-today">0</div></div>
+        <div class="stat-card"><div class="stat-label">Pending Orders</div><div class="stat-value chili" id="stat-orders-pending">0</div></div>
+        <div class="stat-card"><div class="stat-label">Revenue Today</div><div class="stat-value herb" id="stat-revenue-today">$0.00</div></div>
+        <div class="stat-card"><div class="stat-label">Total Products</div><div class="stat-value" id="stat-products">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Customers</div><div class="stat-value" id="stat-customers">0</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Recent Orders</h3></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Placed</th></tr></thead>
+          <tbody id="dashboard-recent-orders"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ---- Products ---- -->
+    <section class="view" id="view-products">
+      <div class="topbar">
+        <div><div class="page-title">Products</div><div class="page-sub">Changes here appear on the storefront instantly.</div></div>
+        <button class="btn btn-primary" id="add-product-btn">+ Add Product</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3>All Products</h3>
+          <input class="search-input" id="products-search" placeholder="Search products…" />
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Rating</th><th>Status</th><th></th></tr></thead>
+          <tbody id="products-table-body"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ---- Categories ---- -->
+    <section class="view" id="view-categories">
+      <div class="topbar">
+        <div><div class="page-title">Categories</div><div class="page-sub">Controls the category buttons and product filters on the storefront.</div></div>
+        <button class="btn btn-primary" id="add-category-btn">+ Add Category</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>All Categories</h3></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Emoji</th><th>Name</th><th>Filter Key</th><th>Order</th><th>Status</th><th></th></tr></thead>
+          <tbody id="categories-table-body"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ---- Orders ---- -->
+    <section class="view" id="view-orders">
+      <div class="topbar">
+        <div><div class="page-title">Orders</div><div class="page-sub">Update order status — customers see live tracking status changes.</div></div>
+        <button class="btn btn-primary" id="add-order-btn">+ Add Order (phone-in)</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3>All Orders</h3>
+          <div class="filter-row">
+            <input class="search-input" id="orders-search" placeholder="Search order # or phone…" />
+            <select class="search-input" id="orders-status-filter">
+              <option value="">All statuses</option>
+              <option>Pending</option><option>Preparing</option><option>Out for Delivery</option><option>Delivered</option><option>Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Order #</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Placed</th><th></th></tr></thead>
+          <tbody id="orders-table-body"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ---- Customers ---- -->
+    <section class="view" id="view-customers">
+      <div class="topbar">
+        <div><div class="page-title">Customers</div><div class="page-sub">Built automatically from checkout data — also fully editable here.</div></div>
+        <button class="btn btn-primary" id="add-customer-btn">+ Add Customer</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3>All Customers</h3>
+          <input class="search-input" id="customers-search" placeholder="Search name or phone…" />
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Phone</th><th>City</th><th>Orders</th><th>Total Spent</th><th>Last Order</th><th></th></tr></thead>
+          <tbody id="customers-table-body"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ---- Coupons ---- -->
+    <section class="view" id="view-coupons">
+      <div class="topbar">
+        <div><div class="page-title">Coupons</div><div class="page-sub">Applied live in the storefront cart.</div></div>
+        <button class="btn btn-primary" id="add-coupon-btn">+ Add Coupon</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>All Coupons</h3></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Subtotal</th><th>Status</th><th></th></tr></thead>
+          <tbody id="coupons-table-body"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ---- Reviews ---- -->
+    <section class="view" id="view-reviews">
+      <div class="topbar"><div><div class="page-title">Reviews</div><div class="page-sub">Moderate reviews submitted from product Quick View.</div></div></div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3>All Reviews</h3>
+          <input class="search-input" id="reviews-search" placeholder="Search reviews…" />
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Product ID</th><th>Name</th><th>Rating</th><th>Comment</th><th>Status</th><th></th></tr></thead>
+          <tbody id="reviews-table-body"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ---- Settings ---- -->
+    <section class="view" id="view-settings">
+      <div class="topbar"><div><div class="page-title">Website Settings</div><div class="page-sub">Global storefront configuration.</div></div></div>
+      <div class="panel">
+        <div class="modal-body">
+          <form id="settings-form">
+            <div class="form-row">
+              <div class="field"><label>Store Name</label><input id="set-storeName" /></div>
+              <div class="field"><label>Currency Symbol</label><input id="set-currencySymbol" maxlength="3" /></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label>Tax Rate (e.g. 0.08 = 8%)</label><input id="set-taxRate" type="number" step="0.001" /></div>
+              <div class="field"><label>Delivery Fee</label><input id="set-deliveryFee" type="number" step="0.01" /></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label>Free Delivery Threshold</label><input id="set-freeDeliveryThreshold" type="number" step="0.01" /></div>
+              <div class="field"><label>Support Phone / Note</label><input id="set-supportNote" /></div>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="set-maintenanceMode" />
+              <label for="set-maintenanceMode">Maintenance mode (reference flag — wire this into the storefront if you want an actual banner/lockout)</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+            <span class="field-error" id="settings-msg" style="margin-left:10px;"></span>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= Generic Modal (Product / Category / Coupon forms) ================= -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modal-title">Form</h3><button class="icon-btn" id="modal-close">✕</button></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Order Detail Drawer ================= -->
+<div class="drawer-overlay" id="order-drawer-overlay"></div>
+<div class="drawer" id="order-drawer">
+  <div class="drawer-head"><h3 id="order-drawer-title">Order</h3><button class="icon-btn" id="order-drawer-close">✕</button></div>
+  <div class="drawer-body" id="order-drawer-body"></div>
+</div>
+
+<div id="admin-toast"></div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
